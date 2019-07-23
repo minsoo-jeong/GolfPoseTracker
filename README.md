@@ -6,7 +6,7 @@
 ### 설치
  - [JDK](https://github.com/JinhaSong/GolfPoseTracker/wiki/JDK-%EC%84%A4%EC%B9%98)
  - [Android Studio](https://github.com/JinhaSong/GolfPoseTracker/wiki/Android-Studio-%EC%84%A4%EC%B9%98)
-### 환경설정
+### 환경변수 설정
  - [JDK 환경변수 설정](https://github.com/JinhaSong/GolfPoseTracker/wiki/JDK-%ED%99%98%EA%B2%BD%EB%B3%80%EC%88%98-%EC%84%A4%EC%A0%95)
 ### Library import
  - [Project 내에 OpenCV library import](https://github.com/JinhaSong/GolfPoseTracker/wiki/Project-%EB%82%B4%EC%97%90-OpenCV-Library-import)
