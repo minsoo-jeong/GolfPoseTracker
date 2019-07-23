@@ -1,8 +1,8 @@
-package com.example.golfposetracker;
+package kr.ac.sogang.mmlab.golfposetracker;
 
 import android.content.Context;
-import androidx.test.InstrumentationRegistry;
-import androidx.test.runner.AndroidJUnit4;
+import android.support.test.InstrumentationRegistry;
+import android.support.test.runner.AndroidJUnit4;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -21,6 +21,6 @@ public class ExampleInstrumentedTest {
         // Context of the app under test.
         Context appContext = InstrumentationRegistry.getTargetContext();
 
-        assertEquals("com.example.golfposetracker", appContext.getPackageName());
+        assertEquals("kr.ac.sogang.mmlab.golfposetracker", appContext.getPackageName());
     }
 }

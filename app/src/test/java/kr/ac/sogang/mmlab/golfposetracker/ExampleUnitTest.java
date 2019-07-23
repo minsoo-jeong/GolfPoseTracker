@@ -1,4 +1,4 @@
-package com.example.golfposetracker;
+package kr.ac.sogang.mmlab.golfposetracker;
 
 import org.junit.Test;
 
