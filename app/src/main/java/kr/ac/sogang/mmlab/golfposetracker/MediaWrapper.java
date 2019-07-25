@@ -236,15 +236,7 @@ public class MediaWrapper {
             Log.e("REF", "ref " + (idx - refIntv) + "/" + idx + "/" + (idx + refIntv));
             Mat prev = frames.get(idx - refIntv);
             Mat next = frames.get(idx + refIntv);
-            if(prev.empty()){
-                Log.e("EMPTY", "empty prev " + (idx - refIntv));
-            }
-            if(curr.empty()){
-                Log.e("EMPTY", "empty curr " + (idx));
-            }
-            if(next.empty()){
-                Log.e("EMPTY", "empty next " + (idx + refIntv));
-            }
+
             Mat p_gray = GrayBlur(prev);
             Mat c_gray = GrayBlur(curr);
             Mat n_gray = GrayBlur(next);
