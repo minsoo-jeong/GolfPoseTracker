@@ -1,34 +1,51 @@
 package kr.ac.sogang.mmlab.golfposetracker;
 
+import android.app.AlertDialog;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Build;
+import android.os.Bundle;
+import android.os.SystemClock;
 import android.provider.MediaStore;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
+import android.widget.TextView;
+import android.widget.Toast;
 import android.widget.VideoView;
 
 import org.opencv.android.Utils;
 import org.opencv.core.Mat;
-import org.opencv.videoio.VideoCapture;
 
 public class MainActivity extends AppCompatActivity {
 
-    private Button btn;
-    private VideoView videoView;
-    private ImageView imageView;
+    private Button btnSelectVideo;
+    private Button btnCreateVideo;
+    private Button btnCreateImage;
+
+    private EditText editTextVideoName;
+    private EditText editTextImageName;
+    private EditText editTextThreshold1;
+    private EditText editTextThreshold2;
+
+    private TextView textViewFrameCount;
+
     private int GALLERY = 1, CAMERA = 2;
+    private MediaWrapper mediaWrapper = new MediaWrapper();
+    private String selectedVideoPath;
+    private String dirPath = "/storage/emulated/0/DCIM/Camera/";
+
 
     static final int PERMISSIONS_REQUEST_CODE = 1000;
-    String[] PERMISSIONS  = {"android.permission.WRITE_EXTERNAL_STORAGE", "android.permission.READ_EXTERNAL_STORAGE"};
+    String[] PERMISSIONS  = {"android.permission.READ_EXTERNAL_STORAGE", "android.permission.WRITE_EXTERNAL_STORAGE"};
 
     static {
         System.loadLibrary("opencv_java4");
@@ -39,9 +56,17 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        btn = (Button) findViewById(R.id.btn);
-        videoView = (VideoView)findViewById(R.id.videoView);
-        imageView = (ImageView)findViewById(R.id.imageView);
+        btnSelectVideo = (Button) findViewById(R.id.btnSelectVideo);
+        btnCreateVideo = (Button) findViewById(R.id.btnCreateVideo);
+        btnCreateImage = (Button) findViewById(R.id.btnCreateImage);
+
+        editTextVideoName = (EditText)findViewById(R.id.editTextVideoName);
+        editTextImageName = (EditText)findViewById(R.id.editTextImageName);
+
+        editTextThreshold1 = (EditText)findViewById(R.id.editTextThreshold1);
+        editTextThreshold2 = (EditText)findViewById(R.id.editTextThreshold2);
+
+        textViewFrameCount = (TextView)findViewById(R.id.textViewFrameCount);
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             if (!hasPermissions(PERMISSIONS)) {
@@ -49,13 +74,34 @@ public class MainActivity extends AppCompatActivity {
             }
         }
 
-        btn.setOnClickListener(new View.OnClickListener() {
+        btnSelectVideo.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 chooseVideoFromGallary();
             }
         });
 
+        btnCreateVideo.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                boolean success = CreateSwingVideo();
+                if (success)
+                    Toast.makeText(getApplicationContext(), "Create Video Success", Toast.LENGTH_LONG).show();
+                else
+                    Toast.makeText(getApplicationContext(), "Create Video Fail", Toast.LENGTH_LONG).show();
+            }
+        });
+
+        btnCreateImage.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                boolean success = CreateSwingImage();
+                if (success)
+                    Toast.makeText(getApplicationContext(), "Create Image Success", Toast.LENGTH_LONG).show();
+                else
+                    Toast.makeText(getApplicationContext(), "Create Image Fail", Toast.LENGTH_LONG).show();
+            }
+        });
     }
 
     public void chooseVideoFromGallary() {
@@ -69,37 +115,120 @@ public class MainActivity extends AppCompatActivity {
         Log.d("result",""+resultCode);
         super.onActivityResult(requestCode, resultCode, data);
         if (resultCode == this.RESULT_CANCELED) {
-            Log.d("what","cancel");
             return;
         }
         if (requestCode == GALLERY) {
             if (data != null) {
                 Uri contentURI = data.getData();
-                String selectedVideoPath = getPath(contentURI);
+                selectedVideoPath = getPath(contentURI);
+                mediaWrapper.VideoOpen(selectedVideoPath);
 
-                Log.d("path",selectedVideoPath);
+                String modifiedVideoName = GetModifiedVideoName();
+                String modifiedImageName = GetModifiedImageName();
 
-                VideoCapture cap = new VideoCapture(selectedVideoPath);
-                if (cap.isOpened()) {
-                    Log.d("Video", "open success");
+                editTextVideoName.setText(modifiedVideoName);
+                editTextImageName.setText(modifiedImageName);
 
-                    Mat frame = new Mat();
-                    cap.read(frame);
-                    Bitmap bitmap = Bitmap.createBitmap(frame.cols(), frame.rows(), Bitmap.Config.ARGB_8888);
-                    Utils.matToBitmap(frame, bitmap);
-                    imageView.setImageBitmap(bitmap);
-                }
-                else {
-                    Log.d("Video", "open fail");
-                }
-
-//                videoView.setVideoURI(contentURI);
-//                videoView.requestFocus();
-//                videoView.start();
+                Log.d("src video", selectedVideoPath);
+                Log.d("modified video name", modifiedVideoName);
+                Log.d("modified image name", modifiedImageName);
             }
         }
     }
 
+    public String GetModifiedVideoName() {
+        String[] videoNameTmp = selectedVideoPath.split(dirPath);
+        String videoName = videoNameTmp[(int)videoNameTmp.length - 1];
+        String regex = "";
+        if (videoName.contains(".mp4")) {
+            regex = ".mp4";
+        }
+        else if (videoName.contains(".avi")) {
+            regex = ".avi";
+        }
+        return dirPath + videoName.split(regex)[0] + "_Modified" + ".avi";
+    }
+
+    public String GetModifiedImageName() {
+        String[] imageNameTmp = selectedVideoPath.split(dirPath);
+        String imageName = imageNameTmp[(int)imageNameTmp.length - 1];
+        String regex = "";
+        if (imageName.contains(".mp4")) {
+            regex = ".mp4";
+        }
+        else if (imageName.contains(".avi")) {
+            regex = ".avi";
+        }
+        String modifiedImageName = dirPath + imageName.split(regex)[0] + "_Modified" + ".png";
+
+        return modifiedImageName;
+    }
+
+    public boolean CreateSwingVideo(){
+        try {
+            mediaWrapper.SetModifiedVideoName(editTextVideoName.getText().toString());
+            double th1 = Double.parseDouble(editTextThreshold1.getText().toString());
+            double th2 = Double.parseDouble(editTextThreshold2.getText().toString());
+
+            mediaWrapper.SetThresholds(th1, th2);
+            Mat srcFrame, modifiedFrame;
+            int frameCount = 0;
+
+            while (true) {
+                srcFrame = mediaWrapper.GetImageFromVideo();
+
+                if (!mediaWrapper.GetGeneratedVideo()) {
+                    mediaWrapper.GenerateVideo(srcFrame);
+                }
+
+                if (srcFrame != null) {
+                    modifiedFrame = mediaWrapper.GenerateFrame(srcFrame);
+
+                    boolean videoSuccess = mediaWrapper.InsertFrameInVideo(modifiedFrame);
+                    if (!videoSuccess) {
+                        Log.e("Insert frame", "Fail to insert a frame into the video");
+                    }
+                } else {
+                    break;
+                }
+                if (frameCount == 0) {
+                    mediaWrapper.SetImage(srcFrame);
+                }
+                if (frameCount % 10 == 0) {
+                    Log.d("=== Frame Number ===","" + String.valueOf(frameCount));
+                }
+                textViewFrameCount.setText(String.valueOf(frameCount));
+                SystemClock.sleep(100);
+                frameCount++;
+            }
+            mediaWrapper.swingVideoRelease();
+//            videoView.setVideoPath(mediaWrapper.GetModifiedVideoName());
+//            videoView.requestFocus();
+//            videoView.start();
+
+            return true;
+        }
+        catch (Exception e){
+            return false;
+        }
+    }
+    public boolean CreateSwingImage() {
+        try {
+            // Test - Save Image
+            Mat frame = mediaWrapper.GetImage();
+            mediaWrapper.SetModifiedImageName(editTextImageName.getText().toString());
+//            Bitmap bitmap = Bitmap.createBitmap(frame.cols(), frame.rows(), Bitmap.Config.ARGB_8888);
+//            Utils.matToBitmap(frame, bitmap);
+//            imageView.setImageBitmap(bitmap);
+            if (!mediaWrapper.SaveImage(frame)) {
+                Log.e("Save Image", "Failed to save a image");
+            }
+            return true;
+        }
+        catch (Exception e) {
+            return false;
+        }
+    }
     public String getPath(Uri uri) {
         String[] projection = { MediaStore.Video.Media.DATA };
         Cursor cursor = getContentResolver().query(uri, projection, null, null, null);
@@ -122,6 +251,7 @@ public class MainActivity extends AppCompatActivity {
         return true;
     }
 }
+
 
 
 //
