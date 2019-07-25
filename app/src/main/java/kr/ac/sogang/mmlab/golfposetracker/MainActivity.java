@@ -23,12 +23,14 @@ import android.widget.Toast;
 import android.widget.VideoView;
 
 import org.opencv.android.Utils;
+
 import org.opencv.core.Core;
 import org.opencv.core.Mat;
 
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+
 
 public class MainActivity extends AppCompatActivity {
 
@@ -50,6 +52,7 @@ public class MainActivity extends AppCompatActivity {
 
 
     static final int PERMISSIONS_REQUEST_CODE = 1000;
+
     String[] PERMISSIONS = {"android.permission.READ_EXTERNAL_STORAGE", "android.permission.WRITE_EXTERNAL_STORAGE"};
 
     static {
@@ -65,6 +68,7 @@ public class MainActivity extends AppCompatActivity {
         btnSelectVideo = (Button) findViewById(R.id.btnSelectVideo);
         btnCreateVideo = (Button) findViewById(R.id.btnCreateVideo);
         btnCreateImage = (Button) findViewById(R.id.btnCreateImage);
+
 
         editTextVideoName = (EditText) findViewById(R.id.editTextVideoName);
         editTextImageName = (EditText) findViewById(R.id.editTextImageName);
@@ -90,13 +94,14 @@ public class MainActivity extends AppCompatActivity {
         btnCreateVideo.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+
                 //boolean success = CreateSwingVideo();
                 boolean success = CreateSwingVideo2();
+
                 if (success)
                     Toast.makeText(getApplicationContext(), "Create Video Success", Toast.LENGTH_LONG).show();
                 else
                     Toast.makeText(getApplicationContext(), "Create Video Fail", Toast.LENGTH_LONG).show();
-
             }
         });
 
@@ -120,7 +125,9 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
 
+
         Log.d("result", "" + resultCode);
+
         super.onActivityResult(requestCode, resultCode, data);
         if (resultCode == this.RESULT_CANCELED) {
             return;
@@ -151,6 +158,7 @@ public class MainActivity extends AppCompatActivity {
         if (videoName.contains(".mp4")) {
             regex = ".mp4";
         } else if (videoName.contains(".avi")) {
+
             regex = ".avi";
         }
         return dirPath + videoName.split(regex)[0] + "_Modified" + ".avi";
@@ -158,6 +166,7 @@ public class MainActivity extends AppCompatActivity {
 
     public String GetModifiedImageName() {
         String[] imageNameTmp = selectedVideoPath.split(dirPath);
+
         String imageName = imageNameTmp[(int) imageNameTmp.length - 1];
         String regex = "";
         if (imageName.contains(".mp4")) {
@@ -170,7 +179,9 @@ public class MainActivity extends AppCompatActivity {
         return modifiedImageName;
     }
 
+
     public boolean CreateSwingVideo() {
+
         try {
             mediaWrapper.SetModifiedVideoName(editTextVideoName.getText().toString());
             double th1 = Double.parseDouble(editTextThreshold1.getText().toString());
@@ -202,13 +213,17 @@ public class MainActivity extends AppCompatActivity {
                     mediaWrapper.SetImage(srcFrame);
                 }
                 if (frameCount % 10 == 0) {
+
                     Log.d("=== Frame Number ===", "" + String.valueOf(frameCount));
+
                 }
                 frameCount++;
             }
             mediaWrapper.swingVideoRelease();
             long end = System.currentTimeMillis();
+
             double time = (end - start) / 1000.0;
+
             textViewFrameCount.setText(String.valueOf(frameCount) + " / " + String.valueOf(time) + " sec");
 
             Log.d("== Processing Time ==", String.valueOf(time) + "sec");
@@ -218,6 +233,7 @@ public class MainActivity extends AppCompatActivity {
 //            videoView.start();
 
             return true;
+
         } catch (Exception e) {
             return false;
         }
@@ -268,6 +284,7 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+
     public boolean CreateSwingImage() {
         try {
             // Test - Save Image
@@ -280,13 +297,14 @@ public class MainActivity extends AppCompatActivity {
                 Log.e("Save Image", "Failed to save a image");
             }
             return true;
+
         } catch (Exception e) {
             return false;
         }
     }
 
     public String getPath(Uri uri) {
-        String[] projection = {MediaStore.Video.Media.DATA};
+        String[] projection = { MediaStore.Video.Media.DATA };
         Cursor cursor = getContentResolver().query(uri, projection, null, null, null);
         if (cursor != null) {
             int column_index = cursor.getColumnIndexOrThrow(MediaStore.Video.Media.DATA);
@@ -298,15 +316,18 @@ public class MainActivity extends AppCompatActivity {
 
     private boolean hasPermissions(String[] permissions) {
         int result;
+
         for (String perms : permissions) {
             result = ContextCompat.checkSelfPermission(this, perms);
             if (result == PackageManager.PERMISSION_DENIED) {
+
                 return false;
             }
         }
         return true;
     }
 }
+
 
 
 //

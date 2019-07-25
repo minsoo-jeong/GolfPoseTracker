@@ -4,8 +4,10 @@ import android.util.Log;
 
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
+
 import org.opencv.core.MatOfPoint;
 import org.opencv.core.MatOfPoint2f;
+
 import org.opencv.core.Scalar;
 import org.opencv.core.Size;
 import org.opencv.imgcodecs.Imgcodecs;
@@ -13,6 +15,7 @@ import org.opencv.imgproc.Imgproc;
 import org.opencv.videoio.VideoCapture;
 import org.opencv.videoio.VideoWriter;
 import org.opencv.videoio.Videoio;
+
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -40,20 +43,24 @@ import static org.opencv.videoio.Videoio.CAP_PROP_FPS;
 import static org.opencv.videoio.Videoio.CAP_PROP_FOURCC;
 
 
+
 public class MediaWrapper {
     private VideoCapture cap;
     private String videoPath;
     private String modifiedVideoName;
     private String modifiedImageName;
     private Mat outputImage;
+
     private Mat motions;
     private Mat motions_mask;
 
     private int smpRate;
     private int refIntv;
 
+
     private VideoWriter swingVideoWriter = null;
     private String modifiedVideoPath;
+
 
     private List<Mat> frames;
     ;
@@ -82,6 +89,7 @@ public class MediaWrapper {
         Mat frame = new Mat();
         cap.read(frame);
         if (!frame.empty()) {
+
             cvtColor(frame, frame, COLOR_BGR2RGB);
             return frame;
         } else {
@@ -100,6 +108,7 @@ public class MediaWrapper {
 
     double Getref_intv() {
         return refIntv;
+
     }
 
     void SetImage(Mat image) {
@@ -129,9 +138,7 @@ public class MediaWrapper {
     boolean SaveImage(Mat image) {
         Mat saveImage = new Mat(image.rows(), image.cols(), CvType.CV_8U, new Scalar(3));
         cvtColor(image, saveImage, Imgproc.COLOR_BGR2RGB, 3);
-
         Imgcodecs.imwrite(GetModifiedImageName(), saveImage);
-
         return true;
     }
 
@@ -140,6 +147,7 @@ public class MediaWrapper {
             Log.e("VideoWriter", "" + GetModifiedVideoName() + " / " + String.valueOf(frame.rows()) + " / " + String.valueOf(frame.cols()));
             swingVideoWriter = new VideoWriter(GetModifiedVideoName(), VideoWriter.fourcc('M', 'J', 'P', 'G'), 30.0, new Size(frame.cols(), frame.rows()), true);
             return true;
+
         } catch (Exception e) {
             return false;
         }
@@ -148,6 +156,7 @@ public class MediaWrapper {
     boolean GetGeneratedVideo() {
         if (swingVideoWriter != null) {
             return true;
+
         } else {
             return false;
         }
@@ -157,11 +166,12 @@ public class MediaWrapper {
         try {
             Mat saveFrame = new Mat(frame.rows(), frame.cols(), CvType.CV_8U, new Scalar(3));
             cvtColor(frame, saveFrame, Imgproc.COLOR_BGR2RGB, 3);
+
             swingVideoWriter.write(saveFrame);
             saveFrame = null;
-
             return true;
         } catch (Exception e) {
+
             return false;
         }
     }
@@ -173,6 +183,7 @@ public class MediaWrapper {
     void swingVideoRelease() {
         swingVideoWriter.release();
     }
+
 
     /********************************************/
     /********************************************/

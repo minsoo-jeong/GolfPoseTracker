@@ -57,7 +57,6 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal">
-
                 <TextView
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
@@ -65,7 +64,6 @@
                     android:gravity="start"
                     android:text="Sampling Rate"
                     android:textSize="15dp" />
-
                 <TextView
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
@@ -123,22 +121,22 @@
                             android:layout_height="wrap_content"
                             android:layout_weight="0.1"
                             android:ems="10"
+
                             android:focusable="true"
                             android:gravity="center"
                             android:inputType="numberSigned"
                             android:text="2" />
-
                         <EditText
                             android:id="@+id/editTextThreshold2"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:layout_weight="0.1"
                             android:ems="10"
+
                             android:focusable="true"
                             android:gravity="center"
                             android:inputType="numberSigned"
                             android:text="10" />
-
                     </LinearLayout>
                     <!--<ImageView-->
                         <!--android:id="@+id/imageView"-->
