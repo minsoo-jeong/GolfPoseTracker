@@ -7,28 +7,182 @@
     android:layout_height="match_parent"
     tools:context=".MainActivity">
 
-    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-        xmlns:tools="http://schemas.android.com/tools"
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical">
+        <ScrollView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
 
-        <Button
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:id="@+id/btn"
-            android:layout_gravity="center_horizontal"
-            android:layout_marginTop="40dp"
-            android:textAppearance="?android:attr/textAppearanceLarge"
-            android:text="Select or Capture Image" />
-        <VideoView
-            android:id="@+id/videoView"
-            android:layout_width="match_parent"
-            android:layout_height="250dp" />
-        <ImageView
-            android:id="@+id/imageView"
-            android:layout_width="match_parent"
-            android:layout_height="250dp" />
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical" >
+
+
+
+                <Button
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/btnSelectVideo"
+                    android:layout_gravity="center_horizontal"
+                    android:layout_marginTop="40dp"
+                    android:textAppearance="?android:attr/textAppearanceLarge"
+                    android:text="Select Video" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:gravity="start"
+                    android:textSize="15dp"
+                    android:text="Frame Count"/>
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:gravity="start"
+                    android:textSize="15dp"
+                    android:id="@+id/textViewFrameCount"
+                    android:text=""/>
+            </LinearLayout>
+                <!--<ProgressBar-->
+                    <!--style="?android:attr/progressBarStyleHorizontal"-->
+                    <!--android:id="@+id/progressBar"-->
+                    <!--android:layout_width="match_parent"-->
+                    <!--android:layout_height="wrap_content"-->
+                    <!--android:indeterminateOnly="false"-->
+                    <!--android:minHeight="20dp"-->
+                    <!--android:minWidth="20dp"-->
+                    <!--android:max="100"/>-->
+
+                <!--<LinearLayout-->
+                    <!--android:layout_width="match_parent"-->
+                    <!--android:layout_height="wrap_content"-->
+                    <!--android:orientation="horizontal">-->
+
+                    <!--<TextView-->
+                        <!--android:layout_width="0dp"-->
+                        <!--android:layout_height="wrap_content"-->
+                        <!--android:layout_weight="1"-->
+                        <!--android:gravity="start"-->
+                        <!--android:textSize="15dp"-->
+                        <!--android:text="0%"/>-->
+
+                    <!--<TextView-->
+                        <!--android:layout_width="0dp"-->
+                        <!--android:layout_height="wrap_content"-->
+                        <!--android:layout_weight="1"-->
+                        <!--android:gravity="end"-->
+                        <!--android:textSize="15dp"-->
+                        <!--android:text="100%"/>-->
+
+                <!--</LinearLayout>-->
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:orientation="vertical">
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center"
+                        android:orientation="horizontal">
+
+                        <EditText
+                            android:id="@+id/editTextThreshold1"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="0.1"
+                            android:ems="10"
+                            android:focusable="false"
+                            android:gravity="center"
+                            android:inputType="numberSigned"
+                            android:text="1" />
+
+                        <EditText
+                            android:id="@+id/editTextThreshold2"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="0.1"
+                            android:ems="10"
+                            android:focusable="false"
+                            android:gravity="center"
+                            android:inputType="numberSigned"
+                            android:text="3" />
+
+                    </LinearLayout>
+                    <!--<ImageView-->
+                        <!--android:id="@+id/imageView"-->
+                        <!--android:layout_width="match_parent"-->
+                        <!--android:layout_height="250dp" />-->
+
+                    <!--<VideoView-->
+                        <!--android:id="@+id/videoView"-->
+                        <!--android:layout_width="match_parent"-->
+                        <!--android:layout_height="250dp" />-->
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:gravity="center"
+                        android:orientation="vertical">
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="center"
+                            android:orientation="horizontal">
+
+                            <EditText
+                                android:id="@+id/editTextVideoName"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="0.1"
+                                android:focusable="false"
+                                android:gravity="center"
+                                android:hint="Video Name" />
+                            <Button
+                                android:id="@+id/btnCreateVideo"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="0.2"
+                                android:text="Create Video" />
+
+                        </LinearLayout>
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="center"
+                            android:orientation="horizontal">
+
+                            <EditText
+                                android:id="@+id/editTextImageName"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="0.1"
+                                android:focusable="false"
+                                android:gravity="center"
+                                android:hint="Image Name" />
+
+                            <Button
+                                android:id="@+id/btnCreateImage"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="0.2"
+                                android:text="Create Image" />
+                        </LinearLayout>
+                    </LinearLayout>
+                </LinearLayout>
+            </LinearLayout>
+        </ScrollView>
     </LinearLayout>
 
 </android.support.constraint.ConstraintLayout>
