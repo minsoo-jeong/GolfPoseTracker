@@ -174,6 +174,7 @@ public class MainActivity extends AppCompatActivity {
             Mat srcFrame, modifiedFrame;
             int frameCount = 0;
 
+            long start = System.currentTimeMillis();
             while (true) {
                 srcFrame = mediaWrapper.GetImageFromVideo();
 
@@ -197,10 +198,15 @@ public class MainActivity extends AppCompatActivity {
                 if (frameCount % 10 == 0) {
                     Log.d("=== Frame Number ===","" + String.valueOf(frameCount));
                 }
-                textViewFrameCount.setText(String.valueOf(frameCount));
                 frameCount++;
             }
             mediaWrapper.swingVideoRelease();
+            long end = System.currentTimeMillis();
+            double time = (end - start)/1000.0;
+            textViewFrameCount.setText(String.valueOf(frameCount) + " / " + String.valueOf(time) + " sec");
+
+            Log.d("== Processing Time ==", String.valueOf(time) + "sec");
+
 //            videoView.setVideoPath(mediaWrapper.GetModifiedVideoName());
 //            videoView.requestFocus();
 //            videoView.start();
