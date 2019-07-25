@@ -198,7 +198,6 @@ public class MainActivity extends AppCompatActivity {
                     Log.d("=== Frame Number ===","" + String.valueOf(frameCount));
                 }
                 textViewFrameCount.setText(String.valueOf(frameCount));
-                SystemClock.sleep(100);
                 frameCount++;
             }
             mediaWrapper.swingVideoRelease();
