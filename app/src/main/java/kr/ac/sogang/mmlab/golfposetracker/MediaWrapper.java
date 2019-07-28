@@ -1,7 +1,9 @@
 package kr.ac.sogang.mmlab.golfposetracker;
 
+import android.graphics.Bitmap;
 import android.util.Log;
 
+import org.opencv.android.Utils;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
 
@@ -53,6 +55,8 @@ public class MediaWrapper {
 
     private Mat motions;
     private Mat motions_mask;
+    public Bitmap startFrame;
+    public Bitmap mFrame;
 
     private int smpRate;
     private int refIntv;
@@ -70,17 +74,23 @@ public class MediaWrapper {
     boolean VideoOpen(String selectedVideoPath) {
         videoPath = selectedVideoPath;
         cap = new VideoCapture(videoPath);
-
-        Log.e("FrameCount", "" + String.valueOf(cap.get(CAP_PROP_FRAME_COUNT)));
-        Log.e("w", "" + String.valueOf(cap.get(CAP_PROP_FRAME_WIDTH)));
-        Log.e("h", "" + String.valueOf(cap.get(CAP_PROP_FRAME_HEIGHT)));
-        Log.e("fps", "" + String.valueOf(cap.get(CAP_PROP_FPS)));
-        Log.e("fourcc", "" + String.valueOf(cap.get(CAP_PROP_FOURCC)));
-
+        Log.e("INFO", "is Opend : "+String.valueOf(cap.isOpened()));
+        Log.e("INFO", String.valueOf(cap.get(CAP_PROP_FRAME_COUNT)));
+        Log.e("INFO", String.valueOf(cap.get(CAP_PROP_FRAME_WIDTH)));
+        Log.e("INFO", String.valueOf(cap.get(CAP_PROP_FRAME_HEIGHT)));
+        Log.e("INFO", String.valueOf(cap.get(CAP_PROP_FPS)));
+        Log.e("INFO", String.valueOf(cap.get(CAP_PROP_FOURCC)));
 
         if (cap.isOpened()) {
+            Mat start=new Mat();
+            cap.read(start);
+            startFrame=Bitmap.createBitmap(start.cols(),start.rows(),Bitmap.Config.RGB_565);
+            mFrame=Bitmap.createBitmap(start.cols(),start.rows(),Bitmap.Config.RGB_565);
+            Utils.matToBitmap(start,startFrame);
+            Log.e("INFO","READ First Frame");
             return true;
         } else {
+            Log.e("INFO","READ First Frame ... fail");
             return false;
         }
     }
@@ -89,7 +99,6 @@ public class MediaWrapper {
         Mat frame = new Mat();
         cap.read(frame);
         if (!frame.empty()) {
-
             cvtColor(frame, frame, COLOR_BGR2RGB);
             return frame;
         } else {
@@ -146,6 +155,7 @@ public class MediaWrapper {
         try {
             Log.e("VideoWriter", "" + GetModifiedVideoName() + " / " + String.valueOf(frame.rows()) + " / " + String.valueOf(frame.cols()));
             swingVideoWriter = new VideoWriter(GetModifiedVideoName(), VideoWriter.fourcc('M', 'J', 'P', 'G'), 30.0, new Size(frame.cols(), frame.rows()), true);
+            Log.e("INFO", "is Opened : "+String.valueOf(swingVideoWriter.isOpened()));
             return true;
 
         } catch (Exception e) {
@@ -154,10 +164,12 @@ public class MediaWrapper {
     }
 
     boolean GetGeneratedVideo() {
-        if (swingVideoWriter != null) {
+        if (swingVideoWriter != null && swingVideoWriter.isOpened()) {
+            Log.e("VIDEO Write","GET VID");
             return true;
 
         } else {
+            Log.e("VIDEO Write","GET VID Fail");
             return false;
         }
     }
@@ -181,7 +193,9 @@ public class MediaWrapper {
     }
 
     void swingVideoRelease() {
+        Log.e("VIDEO Writer","open ? "+swingVideoWriter.isOpened()+" wr "+String.valueOf(swingVideoWriter));
         swingVideoWriter.release();
+        Log.e("VIDEO Writer","open ? "+swingVideoWriter.isOpened()+" wr "+String.valueOf(swingVideoWriter));
     }
 
 
@@ -195,11 +209,12 @@ public class MediaWrapper {
     boolean GenerateVideo() {
         try {
             Mat frame = frames.get(0);
-            Log.e("VideoWriter", "" + GetModifiedVideoName() + " / " + String.valueOf(frame.rows()) + " / " + String.valueOf(frame.cols()));
             swingVideoWriter = new VideoWriter(GetModifiedVideoName(), VideoWriter.fourcc('M', 'J', 'P', 'G'), 30.0, new Size(frame.cols(), frame.rows()), true);
             //swingVideoWriter = new VideoWriter(GetModifiedVideoName(), VideoWriter.fourcc('M', 'P', '4', 'v'), 30.0, new Size(frame.cols(), frame.rows()), true);
             motions = new Mat(new Size(frame.cols(), frame.rows()), CvType.CV_8UC(3), Scalar.all(0));
             motions_mask = new Mat(new Size(frame.cols(), frame.rows()), CvType.CV_8U, Scalar.all(0));
+            Log.e("VideoWriter", "" + GetModifiedVideoName() + " / " + String.valueOf(frame.rows()) + " / " + String.valueOf(frame.cols()));
+            Log.e("VideoWriter","writer is Opened : "+swingVideoWriter.isOpened());
 
             return true;
         } catch (Exception e) {
@@ -305,6 +320,7 @@ public class MediaWrapper {
         try {
             Mat frame = GenerateFrame(idx, flag);
             swingVideoWriter.write(frame);
+            Utils.matToBitmap(frame,mFrame);
             frame.release();
             return true;
         } catch (Exception e) {
