@@ -43,6 +43,8 @@ public class MainActivity extends AppCompatActivity {
     private EditText editTextThreshold1;
     private EditText editTextThreshold2;
 
+    private ImageView previewImg;
+
     private TextView textViewFrameCount;
 
     private int GALLERY = 1, CAMERA = 2;
@@ -63,6 +65,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        Log.e("CREATE","Call onCreate");
         setContentView(R.layout.activity_main);
 
         btnSelectVideo = (Button) findViewById(R.id.btnSelectVideo);
@@ -77,6 +80,8 @@ public class MainActivity extends AppCompatActivity {
         editTextThreshold2 = (EditText) findViewById(R.id.editTextThreshold2);
 
         textViewFrameCount = (TextView) findViewById(R.id.textViewFrameCount);
+
+        previewImg=(ImageView)findViewById(R.id.previewImg);
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             if (!hasPermissions(PERMISSIONS)) {
@@ -122,7 +127,8 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        Log.d("result", "" + resultCode);
+        Log.e("RESULT","ACTIVITY_RESULT");
+        Log.d("RESULT", "" + resultCode);
         super.onActivityResult(requestCode, resultCode, data);
         if (resultCode == this.RESULT_CANCELED) {
             return;
@@ -132,6 +138,7 @@ public class MainActivity extends AppCompatActivity {
                 Uri contentURI = data.getData();
                 selectedVideoPath = getPath(contentURI);
                 mediaWrapper.VideoOpen(selectedVideoPath);
+                previewImg.setImageBitmap(mediaWrapper.startFrame);
 
                 String modifiedVideoName = GetModifiedVideoName();
                 String modifiedImageName = GetModifiedImageName();
@@ -257,6 +264,7 @@ public class MainActivity extends AppCompatActivity {
             for (int i = 0; i <= last_idx; i++) {
                 boolean flag =  i >= start_idx + th2 && i <= last_idx - th2 && (i - start_idx) % th1 == 0;
                 boolean ret = mediaWrapper.InsertFrameInVideo(i, flag);
+                previewImg.setImageBitmap(mediaWrapper.mFrame);
                 Log.e("Insert frame", "insert a frame into the video... idx : "+i+" / flag : "+flag);
                 if (!ret) {
                     Log.e("Insert frame", "Fail to insert a frame into the video"+i+"/"+flag);
