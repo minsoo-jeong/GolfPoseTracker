@@ -154,7 +154,7 @@ public class MediaWrapper {
     }
 
     boolean GetGeneratedVideo() {
-        if (swingVideoWriter != null) {
+        if (swingVideoWriter != null && swingVideoWriter.isOpened()) {
             return true;
 
         } else {
@@ -182,6 +182,7 @@ public class MediaWrapper {
 
     void swingVideoRelease() {
         swingVideoWriter.release();
+        swingVideoWriter=null;
     }
 
 

@@ -94,10 +94,8 @@ public class MainActivity extends AppCompatActivity {
         btnCreateVideo.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
                 //boolean success = CreateSwingVideo();
                 boolean success = CreateSwingVideo2();
-
                 if (success)
                     Toast.makeText(getApplicationContext(), "Create Video Success", Toast.LENGTH_LONG).show();
                 else
@@ -124,10 +122,7 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
-
-
         Log.d("result", "" + resultCode);
-
         super.onActivityResult(requestCode, resultCode, data);
         if (resultCode == this.RESULT_CANCELED) {
             return;

@@ -1,6 +1,5 @@
 -- Merging decision tree log ---
 manifest
-<<<<<<< HEAD
 ADDED from E:\GolfPoseTracker-master\opencv\java\AndroidManifest.xml:2:1-6:12
 INJECTED from E:\GolfPoseTracker-master\opencv\java\AndroidManifest.xml:2:1-6:12
 INJECTED from E:\GolfPoseTracker-master\opencv\java\AndroidManifest.xml:2:1-6:12
@@ -36,40 +35,3 @@ INJECTED from E:\GolfPoseTracker-master\opencv\java\AndroidManifest.xml
 		INJECTED from E:\GolfPoseTracker-master\opencv\java\AndroidManifest.xml
 		ADDED from E:\GolfPoseTracker-master\opencv\java\AndroidManifest.xml
 		INJECTED from E:\GolfPoseTracker-master\opencv\java\AndroidManifest.xml
-=======
-ADDED from C:\Users\Administrator\Documents\AndroidStudio\GolfPoseTracker\opencv\java\AndroidManifest.xml:2:1-6:12
-INJECTED from C:\Users\Administrator\Documents\AndroidStudio\GolfPoseTracker\opencv\java\AndroidManifest.xml:2:1-6:12
-INJECTED from C:\Users\Administrator\Documents\AndroidStudio\GolfPoseTracker\opencv\java\AndroidManifest.xml:2:1-6:12
-INJECTED from C:\Users\Administrator\Documents\AndroidStudio\GolfPoseTracker\opencv\java\AndroidManifest.xml:2:1-6:12
-INJECTED from C:\Users\Administrator\Documents\AndroidStudio\GolfPoseTracker\opencv\java\AndroidManifest.xml:2:1-6:12
-INJECTED from C:\Users\Administrator\Documents\AndroidStudio\GolfPoseTracker\opencv\java\AndroidManifest.xml:2:1-6:12
-INJECTED from C:\Users\Administrator\Documents\AndroidStudio\GolfPoseTracker\opencv\java\AndroidManifest.xml:2:1-6:12
-	package
-		ADDED from C:\Users\Administrator\Documents\AndroidStudio\GolfPoseTracker\opencv\java\AndroidManifest.xml:3:7-27
-		INJECTED from C:\Users\Administrator\Documents\AndroidStudio\GolfPoseTracker\opencv\java\AndroidManifest.xml
-		INJECTED from C:\Users\Administrator\Documents\AndroidStudio\GolfPoseTracker\opencv\java\AndroidManifest.xml
-	android:versionName
-		ADDED from C:\Users\Administrator\Documents\AndroidStudio\GolfPoseTracker\opencv\java\AndroidManifest.xml:5:7-34
-		INJECTED from C:\Users\Administrator\Documents\AndroidStudio\GolfPoseTracker\opencv\java\AndroidManifest.xml
-		INJECTED from C:\Users\Administrator\Documents\AndroidStudio\GolfPoseTracker\opencv\java\AndroidManifest.xml
-	xmlns:android
-		ADDED from C:\Users\Administrator\Documents\AndroidStudio\GolfPoseTracker\opencv\java\AndroidManifest.xml:2:11-69
-	android:versionCode
-		ADDED from C:\Users\Administrator\Documents\AndroidStudio\GolfPoseTracker\opencv\java\AndroidManifest.xml:4:7-33
-		INJECTED from C:\Users\Administrator\Documents\AndroidStudio\GolfPoseTracker\opencv\java\AndroidManifest.xml
-		INJECTED from C:\Users\Administrator\Documents\AndroidStudio\GolfPoseTracker\opencv\java\AndroidManifest.xml
-uses-sdk
-INJECTED from C:\Users\Administrator\Documents\AndroidStudio\GolfPoseTracker\opencv\java\AndroidManifest.xml reason: use-sdk injection requested
-INJECTED from C:\Users\Administrator\Documents\AndroidStudio\GolfPoseTracker\opencv\java\AndroidManifest.xml
-INJECTED from C:\Users\Administrator\Documents\AndroidStudio\GolfPoseTracker\opencv\java\AndroidManifest.xml
-INJECTED from C:\Users\Administrator\Documents\AndroidStudio\GolfPoseTracker\opencv\java\AndroidManifest.xml
-INJECTED from C:\Users\Administrator\Documents\AndroidStudio\GolfPoseTracker\opencv\java\AndroidManifest.xml
-	android:targetSdkVersion
-		INJECTED from C:\Users\Administrator\Documents\AndroidStudio\GolfPoseTracker\opencv\java\AndroidManifest.xml
-		ADDED from C:\Users\Administrator\Documents\AndroidStudio\GolfPoseTracker\opencv\java\AndroidManifest.xml
-		INJECTED from C:\Users\Administrator\Documents\AndroidStudio\GolfPoseTracker\opencv\java\AndroidManifest.xml
-	android:minSdkVersion
-		INJECTED from C:\Users\Administrator\Documents\AndroidStudio\GolfPoseTracker\opencv\java\AndroidManifest.xml
-		ADDED from C:\Users\Administrator\Documents\AndroidStudio\GolfPoseTracker\opencv\java\AndroidManifest.xml
-		INJECTED from C:\Users\Administrator\Documents\AndroidStudio\GolfPoseTracker\opencv\java\AndroidManifest.xml
->>>>>>> 1a51cb54a32deb1b0c65cc7e8ffba79494a71cd8
