@@ -53,6 +53,8 @@ public class MainActivity extends AppCompatActivity {
     private String dirPath = "/storage/emulated/0/DCIM/Camera/";
 
 
+
+
     static final int PERMISSIONS_REQUEST_CODE = 1000;
 
     String[] PERMISSIONS = {"android.permission.READ_EXTERNAL_STORAGE", "android.permission.WRITE_EXTERNAL_STORAGE"};
@@ -81,7 +83,7 @@ public class MainActivity extends AppCompatActivity {
 
         textViewFrameCount = (TextView) findViewById(R.id.textViewFrameCount);
 
-        previewImg=(ImageView)findViewById(R.id.previewImg);
+        //previewImg=(ImageView)findViewById(R.id.previewImg);
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             if (!hasPermissions(PERMISSIONS)) {
@@ -100,11 +102,13 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 //boolean success = CreateSwingVideo();
-                boolean success = CreateSwingVideo2();
+                boolean success = CreateSwingVideo3();
                 if (success)
                     Toast.makeText(getApplicationContext(), "Create Video Success", Toast.LENGTH_LONG).show();
                 else
                     Toast.makeText(getApplicationContext(), "Create Video Fail", Toast.LENGTH_LONG).show();
+
+                //previewImg.setImageResource(R.drawable.preview_default);
             }
         });
 
@@ -131,6 +135,8 @@ public class MainActivity extends AppCompatActivity {
         Log.d("RESULT", "" + resultCode);
         super.onActivityResult(requestCode, resultCode, data);
         if (resultCode == this.RESULT_CANCELED) {
+            //previewImg.setImageBitmap(mediaWrapper.startFrame);
+            //previewImg.setImageResource(R.drawable.preview_default);
             return;
         }
         if (requestCode == GALLERY) {
@@ -138,7 +144,7 @@ public class MainActivity extends AppCompatActivity {
                 Uri contentURI = data.getData();
                 selectedVideoPath = getPath(contentURI);
                 mediaWrapper.VideoOpen(selectedVideoPath);
-                previewImg.setImageBitmap(mediaWrapper.startFrame);
+                //previewImg.setImageBitmap(mediaWrapper.startFrame);
 
                 String modifiedVideoName = GetModifiedVideoName();
                 String modifiedImageName = GetModifiedImageName();
@@ -241,6 +247,33 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    public boolean CreateSwingVideo3(){
+        try{
+            mediaWrapper.SetModifiedVideoName(editTextVideoName.getText().toString());
+            //sampling rate
+            double th1 = Double.parseDouble(editTextThreshold1.getText().toString());
+            //ref interval
+            double th2 = Double.parseDouble(editTextThreshold2.getText().toString());
+            mediaWrapper.SetThresholds(th1, th2);
+            long start = System.currentTimeMillis();
+            int i=0;
+            while(mediaWrapper.GetFrame()){
+                Mat frame=mediaWrapper.generate_frame();
+                Log.e("Insert frame", "insert a frame into the video... idx : "+i);
+                i++;
+            }
+            long end = System.currentTimeMillis();
+            double time = (end - start) / 1000.0;
+
+            textViewFrameCount.setText(String.valueOf(mediaWrapper.GetframeCnt()) + " / " + String.valueOf(time) + " sec");
+
+            Log.d("== Processing Time ==", String.valueOf(time) + "sec");
+
+            return true;
+        }catch (Exception e){
+            return false;
+        }
+    }
     public boolean CreateSwingVideo2() {
         try {
             mediaWrapper.SetModifiedVideoName(editTextVideoName.getText().toString());
@@ -264,7 +297,7 @@ public class MainActivity extends AppCompatActivity {
             for (int i = 0; i <= last_idx; i++) {
                 boolean flag =  i >= start_idx + th2 && i <= last_idx - th2 && (i - start_idx) % th1 == 0;
                 boolean ret = mediaWrapper.InsertFrameInVideo(i, flag);
-                previewImg.setImageBitmap(mediaWrapper.mFrame);
+                //previewImg.setImageBitmap(mediaWrapper.mFrame);
                 Log.e("Insert frame", "insert a frame into the video... idx : "+i+" / flag : "+flag);
                 if (!ret) {
                     Log.e("Insert frame", "Fail to insert a frame into the video"+i+"/"+flag);
