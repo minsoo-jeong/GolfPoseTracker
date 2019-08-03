@@ -22,6 +22,8 @@ import org.opencv.videoio.Videoio;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Deque;
+import java.util.ArrayDeque;
 import java.util.concurrent.ExecutionException;
 
 
@@ -60,23 +62,30 @@ public class MediaWrapper {
     private int smpRate;
     private int refIntv;
 
-
     private VideoWriter swingVideoWriter = null;
     private String modifiedVideoPath;
 
-
     private List<Mat> frames;
-    ;
     int scanFlag = 0;
     double c;
+
+    /********************************************/
+    /*for v3*/
+    private Deque<Mat> frameBuf;
+    private Deque<Integer> indice;
+    private Deque<Mat> prev;
+    private Deque<Integer> prev_indice;
+    private int frameCnt;
+
+    /********************************************/
 
 
     boolean VideoOpen(String selectedVideoPath) {
         videoPath = selectedVideoPath;
         cap = new VideoCapture(videoPath);
 
-        for(int i=0;i<=45;i++){
-            Log.e("INFO", "iiii"+String.valueOf(cap.get(i)));
+        for (int i = 0; i <= 45; i++) {
+            Log.e("INFO", "iiii" + String.valueOf(cap.get(i)));
         }
 
         Log.e("INFO", String.valueOf(c));
@@ -86,7 +95,14 @@ public class MediaWrapper {
         Log.e("INFO", String.valueOf(cap.get(CAP_PROP_FRAME_HEIGHT)));
         Log.e("INFO", String.valueOf(cap.get(CAP_PROP_FPS)));
         Log.e("INFO", String.valueOf(cap.get(CAP_PROP_FOURCC)));
-
+        if (cap.isOpened()) {
+            Log.e("INFO", "open vid");
+            return true;
+        } else {
+            Log.e("INFO", "Fail to open vid");
+            return false;
+        }
+        /*
         if (cap.isOpened()) {
             Mat start = new Mat();
             cap.read(start);
@@ -98,7 +114,8 @@ public class MediaWrapper {
         } else {
             Log.e("INFO", "READ First Frame ... fail");
             return false;
-        }
+        }*/
+
     }
 
     Mat GetImageFromVideo() {
@@ -171,11 +188,10 @@ public class MediaWrapper {
 
     boolean GetGeneratedVideo() {
         if (swingVideoWriter != null && swingVideoWriter.isOpened()) {
-            Log.e("VIDEO Write", "GET VID");
+            Log.e("VIDEO WRITE", "GET VID");
             return true;
-
         } else {
-            Log.e("VIDEO Write", "GET VID Fail");
+            Log.e("VIDEO WRITE", "GET VID Fail");
             return false;
         }
     }
@@ -199,9 +215,9 @@ public class MediaWrapper {
     }
 
     void swingVideoRelease() {
-        Log.e("VIDEO Writer", "open ? " + swingVideoWriter.isOpened() + " wr " + String.valueOf(swingVideoWriter));
+        Log.e("VIDEO WRITE", "open ? " + swingVideoWriter.isOpened() + " wr " + String.valueOf(swingVideoWriter));
         swingVideoWriter.release();
-        Log.e("VIDEO Writer", "open ? " + swingVideoWriter.isOpened() + " wr " + String.valueOf(swingVideoWriter));
+        swingVideoWriter = null;
     }
 
 
@@ -230,7 +246,6 @@ public class MediaWrapper {
     }
 
     int ScanAllFrames() {
-        int last_idx = GetLastFrameIdx();
         int scanFlag = 0;
         Mat srcFrame;
         frames = new ArrayList<>();
@@ -318,7 +333,6 @@ public class MediaWrapper {
         }
         motions.copyTo(m_frame, motions_mask);
 
-
         return m_frame;
     }
 
@@ -326,7 +340,7 @@ public class MediaWrapper {
         try {
             Mat frame = GenerateFrame(idx, flag);
             swingVideoWriter.write(frame);
-            //Utils.matToBitmap(frame, mFrame);
+            //Utils.matToBitmap(frame,mFrame);
             frame.release();
             return true;
         } catch (Exception e) {
@@ -336,6 +350,162 @@ public class MediaWrapper {
 
     void SetModifiedVideoName(String path, String videoName) {
         modifiedVideoName = path + videoName;
+    }
+
+    /********************************************/
+    /********************************************/
+    /********************************************/
+    int GetframeCnt() {
+        return frameCnt;
+    }
+
+    void init_vid() throws Exception {
+        Mat frame = GetImageFromVideo();
+
+        frameBuf = new ArrayDeque<>();
+        indice = new ArrayDeque<>();
+        prev = new ArrayDeque<>();
+        prev_indice = new ArrayDeque<>();
+        frameCnt = 1;
+
+        swingVideoWriter = new VideoWriter(GetModifiedVideoName(), VideoWriter.fourcc('M', 'J', 'P', 'G'), 30.0, new Size(frame.cols(), frame.rows()), true);
+        motions = new Mat(new Size(frame.cols(), frame.rows()), CvType.CV_8UC(3), Scalar.all(0));
+        motions_mask = new Mat(new Size(frame.cols(), frame.rows()), CvType.CV_8U, Scalar.all(0));
+        //System.out.println("success to create Video : "+GetModifiedVideoName());
+        Log.e("MSG", "success to create Video : " + GetModifiedVideoName());
+
+    }
+
+    void release_vid() {
+        try {
+            cap.release();
+            frameBuf.clear();
+            indice.clear();
+            prev.clear();
+            prev_indice.clear();
+            frameCnt = 0;
+            swingVideoWriter.release();
+            motions.release();
+            motions_mask.release();
+        } catch (Exception e) {
+
+        }
+    }
+
+    private boolean hasRef(int idx) {
+        return idx > refIntv;
+    }
+
+    private boolean isSample(int idx) {
+        return (idx % smpRate == 0) && hasRef(idx);
+    }
+
+    private int isPrev(int idx) {
+        return isSample(idx + refIntv) ? idx + refIntv : -1;
+    }
+
+    private int isNext(int idx) {
+        return isSample(idx - refIntv) ? idx - refIntv : -1;
+    }
+
+    boolean GetFrame() {
+        Mat frame = GetImageFromVideo();
+        if (frame!=null&&!frame.empty()) {
+            frameBuf.addLast(frame);
+            indice.addLast(frameCnt);
+            frameCnt++;
+            return true;
+        } else {
+            return false;
+        }
+    }
+    int GetFrameBufSize(){
+        return frameBuf.size();
+    }
+
+    private void update_motion(Mat prev, Mat curr, Mat next) {
+        Mat p_gray = GrayBlur(prev);
+        Mat c_gray = GrayBlur(curr);
+        Mat n_gray = GrayBlur(next);
+
+        Mat pc_thr = GetDifference(p_gray, c_gray);
+        Mat pn_thr = GetDifference(p_gray, n_gray);
+        Mat cn_thr = GetDifference(c_gray, n_gray);
+
+
+        Mat pcn_thr = new Mat();
+        bitwise_or(pc_thr, cn_thr, pcn_thr);
+        bitwise_or(pcn_thr, pn_thr, pcn_thr);
+        Mat c_stick = new Mat();
+        Mat not_pnthr = new Mat();
+        bitwise_not(pn_thr, not_pnthr);
+        bitwise_and(pcn_thr, not_pnthr, c_stick);
+
+
+        List<MatOfPoint> cntrs = new ArrayList<>();
+
+        Imgproc.findContours(c_stick, cntrs, new Mat(), Imgproc.RETR_TREE, Imgproc.CHAIN_APPROX_SIMPLE);
+        Mat action = new Mat(new Size(c_stick.cols(), c_stick.rows()), CvType.CV_8U, Scalar.all(0));
+        for (int i = 0; i < cntrs.size(); i++) {
+            double area = Imgproc.contourArea(cntrs.get(i));
+            if (area > 100) {
+                Imgproc.drawContours(action, cntrs, i, new Scalar(255), -1);
+            }
+        }
+        curr.copyTo(motions, action);
+        bitwise_or(motions_mask, action, motions_mask);
+
+        action.release();
+        cntrs.clear();
+        not_pnthr.release();
+        c_stick.release();
+        pcn_thr.release();
+        pc_thr.release();
+        cn_thr.release();
+        pn_thr.release();
+        p_gray.release();
+        c_gray.release();
+        n_gray.release();
+    }
+
+    Mat generate_frame() throws Exception{
+        int idx = indice.removeFirst();
+        Mat frame = frameBuf.removeFirst();
+        Mat m_frame = frame.clone();
+
+        //System.out.println("idx : " + String.valueOf(idx) + "/ Sample : " + isSample(idx) + "/ Prev : " + isPrev(idx) + "/ Next : " + isNext(idx));
+        Log.e("MSG", "idx : " + String.valueOf(idx) + "/ Sample : " + isSample(idx) + "/ Prev : " + isPrev(idx) + "/ Next : " + isNext(idx));
+        if (isPrev(idx) != -1) {
+            prev.addLast(frame);
+            prev_indice.addLast(idx);
+        }
+        if (isSample(idx)) {
+            int prev_idx = prev_indice.removeFirst();
+            Mat prev_im = prev.removeFirst();
+            while (indice.size() < refIntv && GetFrame()) ;
+            if (GetFrameBufSize()>=refIntv) {
+                int next_idx = indice.peekLast();
+                Mat next_im = frameBuf.peekLast();
+                if (prev_idx == idx - refIntv && next_idx == idx + refIntv) {
+                    //System.out.println("update motion... " + prev_idx + "/" + idx + "/" + next_idx);
+                    Log.e("MSG", "update motion... " + prev_idx + "/" + idx + "/" + next_idx);
+                    update_motion(prev_im, frame, next_im);
+                    prev_im.release();
+                    Log.e("MSG", "free prev : " + prev_idx);
+                }
+            }
+        }
+        motions.copyTo(m_frame, motions_mask);
+        //System.out.println("apply motion... " + idx);
+        Log.e("MSG", "apply motion... " + idx);
+        swingVideoWriter.write(m_frame);
+
+        if (isPrev(idx) == -1) {
+            frame.release();
+            Log.e("MSG", "free curr : " + idx);
+        }
+        m_frame.release();
+        return m_frame;
     }
 
 }

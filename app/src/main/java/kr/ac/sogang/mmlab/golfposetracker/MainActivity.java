@@ -8,6 +8,9 @@ import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+
+import android.os.Handler;
+import android.os.Message;
 import android.os.SystemClock;
 import android.provider.MediaStore;
 import android.support.v4.content.ContextCompat;
@@ -52,7 +55,6 @@ public class MainActivity extends AppCompatActivity {
     private String selectedVideoPath;
     private String dirPath = "/storage/emulated/0/DCIM/Camera/";
 
-
     static final int PERMISSIONS_REQUEST_CODE = 1000;
 
     String[] PERMISSIONS = {"android.permission.READ_EXTERNAL_STORAGE", "android.permission.WRITE_EXTERNAL_STORAGE"};
@@ -81,7 +83,8 @@ public class MainActivity extends AppCompatActivity {
 
         textViewFrameCount = (TextView) findViewById(R.id.textViewFrameCount);
 
-        previewImg = (ImageView) findViewById(R.id.previewImg);
+        //previewImg=(ImageView)findViewById(R.id.previewImg);
+
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             if (!hasPermissions(PERMISSIONS)) {
@@ -99,14 +102,38 @@ public class MainActivity extends AppCompatActivity {
         btnCreateVideo.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
                 //boolean success = CreateSwingVideo();
-                boolean success = CreateSwingVideo2();
+                final Handler thread_handler = new Handler() {
+                    @Override
+                    public void handleMessage(Message msg) {
+                        super.handleMessage(msg);
+                        GenerateResult result=(GenerateResult)msg.obj;
+                        textViewFrameCount.setText(result.textViewString());
+                        Toast.makeText(getApplicationContext(), result.toastString(), Toast.LENGTH_LONG).show();
+                    }
+                };
 
-                if (success)
-                    Toast.makeText(getApplicationContext(), "Create Video Success", Toast.LENGTH_LONG).show();
-                else
-                    Toast.makeText(getApplicationContext(), "Create Video Fail", Toast.LENGTH_LONG).show();
+                Thread GenerateThread = new Thread(new Runnable() {
+                    @Override
+                    public void run() {
+                        GenerateResult success = CreateSwingVideo3();
+                        Message msg = thread_handler.obtainMessage();
+                        msg.what = 0;
+                        msg.obj = success;
+                        thread_handler.sendMessage(msg);
+
+                        /*
+                        if(success)
+                            Toast.makeText(getApplicationContext(), "Create Video Success", Toast.LENGTH_LONG).show();
+                        else
+                            Toast.makeText(getApplicationContext(), "Create Video Fail", Toast.LENGTH_LONG).show();
+                        */
+
+                    }
+                });
+                GenerateThread.start();
+
+                //previewImg.setImageResource(R.drawable.preview_default);
             }
         });
 
@@ -129,10 +156,14 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
+
         Log.e("RESULT", "ACTIVITY_RESULT");
-        Log.d("result", "" + resultCode);
+        Log.d("RESULT", "" + resultCode);
+
         super.onActivityResult(requestCode, resultCode, data);
         if (resultCode == this.RESULT_CANCELED) {
+            //previewImg.setImageBitmap(mediaWrapper.startFrame);
+            //previewImg.setImageResource(R.drawable.preview_default);
             return;
         }
         if (requestCode == GALLERY) {
@@ -140,8 +171,8 @@ public class MainActivity extends AppCompatActivity {
                 Uri contentURI = data.getData();
                 selectedVideoPath = getPath(contentURI);
                 mediaWrapper.VideoOpen(selectedVideoPath);
-                Log.e("ccc", String.valueOf(mediaWrapper.c));
-                previewImg.setImageBitmap(mediaWrapper.startFrame);
+
+                //previewImg.setImageBitmap(mediaWrapper.startFrame);
 
                 String modifiedVideoName = GetModifiedVideoName2();
                 String modifiedImageName = GetModifiedImageName();
@@ -185,7 +216,6 @@ public class MainActivity extends AppCompatActivity {
 
 
     public boolean CreateSwingVideo() {
-
         try {
             mediaWrapper.SetModifiedVideoName(editTextVideoName.getText().toString());
             double th1 = Double.parseDouble(editTextThreshold1.getText().toString());
@@ -289,6 +319,41 @@ public class MainActivity extends AppCompatActivity {
     /************************************************************************************/
     /************************************************************************************/
 
+
+    public GenerateResult CreateSwingVideo3() {
+        try {
+            GenerateResult r = new GenerateResult();
+
+            mediaWrapper.SetModifiedVideoName(dirPath, editTextVideoName.getText().toString());
+            //sampling rate
+            double th1 = Double.parseDouble(editTextThreshold1.getText().toString());
+            //ref interval
+            double th2 = Double.parseDouble(editTextThreshold2.getText().toString());
+            mediaWrapper.SetThresholds(th1, th2);
+            long start = System.currentTimeMillis();
+
+            mediaWrapper.init_vid();
+            int i = 0;
+            while (mediaWrapper.GetFrame()||mediaWrapper.GetFrameBufSize()!=0) {
+                mediaWrapper.generate_frame();
+                Log.e("Insert frame", "insert a frame into the video... idx : " + i);
+                i++;
+            }
+            long end = System.currentTimeMillis();
+            double time = (end - start) / 1000.0;
+            //textViewFrameCount.setText(String.valueOf(mediaWrapper.GetframeCnt()) + " / " + String.valueOf(time) + " sec");
+            mediaWrapper.release_vid();
+            Log.d("== Processing Time ==", String.valueOf(time) + "sec");
+            r.setSuccess(time, i);
+            return r;
+        } catch (Exception e) {
+            e.printStackTrace();
+            GenerateResult r = new GenerateResult();
+            r.setFail();
+            return r;
+        }
+    }
+
     public boolean CreateSwingVideo2() {
         try {
             mediaWrapper.SetModifiedVideoName(dirPath, editTextVideoName.getText().toString());
@@ -313,6 +378,7 @@ public class MainActivity extends AppCompatActivity {
                 boolean flag = i >= start_idx + th2 && i <= last_idx - th2 && (i - start_idx) % th1 == 0;
                 boolean ret = mediaWrapper.InsertFrameInVideo(i, flag);
                 //previewImg.setImageBitmap(mediaWrapper.mFrame);
+
                 Log.e("Insert frame", "insert a frame into the video... idx : " + i + " / flag : " + flag);
                 if (!ret) {
                     Log.e("Insert frame", "Fail to insert a frame into the video" + i + "/" + flag);
