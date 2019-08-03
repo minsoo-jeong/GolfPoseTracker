@@ -45,7 +45,6 @@ import static org.opencv.videoio.Videoio.CAP_PROP_FPS;
 import static org.opencv.videoio.Videoio.CAP_PROP_FOURCC;
 
 
-
 public class MediaWrapper {
     private VideoCapture cap;
     private String videoPath;
@@ -69,28 +68,35 @@ public class MediaWrapper {
     private List<Mat> frames;
     ;
     int scanFlag = 0;
+    double c;
 
 
     boolean VideoOpen(String selectedVideoPath) {
         videoPath = selectedVideoPath;
         cap = new VideoCapture(videoPath);
-        Log.e("INFO", "is Opend : "+String.valueOf(cap.isOpened()));
-        Log.e("INFO", String.valueOf(cap.get(CAP_PROP_FRAME_COUNT)));
-        Log.e("INFO", String.valueOf(cap.get(CAP_PROP_FRAME_WIDTH)));
+
+        for(int i=0;i<=45;i++){
+            Log.e("INFO", "iiii"+String.valueOf(cap.get(i)));
+        }
+
+        Log.e("INFO", String.valueOf(c));
+        Log.e("INFO", "is Opend : " + String.valueOf(cap.isOpened()));
+        Log.e("INFO", String.valueOf(cap.get(Videoio.CAP_PROP_FRAME_COUNT)));
+        Log.e("INFO", String.valueOf(cap.get(Videoio.CAP_PROP_FRAME_WIDTH)));
         Log.e("INFO", String.valueOf(cap.get(CAP_PROP_FRAME_HEIGHT)));
         Log.e("INFO", String.valueOf(cap.get(CAP_PROP_FPS)));
         Log.e("INFO", String.valueOf(cap.get(CAP_PROP_FOURCC)));
 
         if (cap.isOpened()) {
-            Mat start=new Mat();
+            Mat start = new Mat();
             cap.read(start);
-            startFrame=Bitmap.createBitmap(start.cols(),start.rows(),Bitmap.Config.RGB_565);
-            mFrame=Bitmap.createBitmap(start.cols(),start.rows(),Bitmap.Config.RGB_565);
-            Utils.matToBitmap(start,startFrame);
-            Log.e("INFO","READ First Frame");
+            startFrame = Bitmap.createBitmap(start.cols(), start.rows(), Bitmap.Config.RGB_565);
+            mFrame = Bitmap.createBitmap(start.cols(), start.rows(), Bitmap.Config.RGB_565);
+            Utils.matToBitmap(start, startFrame);
+            Log.e("INFO", "READ First Frame");
             return true;
         } else {
-            Log.e("INFO","READ First Frame ... fail");
+            Log.e("INFO", "READ First Frame ... fail");
             return false;
         }
     }
@@ -155,7 +161,7 @@ public class MediaWrapper {
         try {
             Log.e("VideoWriter", "" + GetModifiedVideoName() + " / " + String.valueOf(frame.rows()) + " / " + String.valueOf(frame.cols()));
             swingVideoWriter = new VideoWriter(GetModifiedVideoName(), VideoWriter.fourcc('M', 'J', 'P', 'G'), 30.0, new Size(frame.cols(), frame.rows()), true);
-            Log.e("INFO", "is Opened : "+String.valueOf(swingVideoWriter.isOpened()));
+            Log.e("INFO", "is Opened : " + String.valueOf(swingVideoWriter.isOpened()));
             return true;
 
         } catch (Exception e) {
@@ -165,11 +171,11 @@ public class MediaWrapper {
 
     boolean GetGeneratedVideo() {
         if (swingVideoWriter != null && swingVideoWriter.isOpened()) {
-            Log.e("VIDEO Write","GET VID");
+            Log.e("VIDEO Write", "GET VID");
             return true;
 
         } else {
-            Log.e("VIDEO Write","GET VID Fail");
+            Log.e("VIDEO Write", "GET VID Fail");
             return false;
         }
     }
@@ -193,9 +199,9 @@ public class MediaWrapper {
     }
 
     void swingVideoRelease() {
-        Log.e("VIDEO Writer","open ? "+swingVideoWriter.isOpened()+" wr "+String.valueOf(swingVideoWriter));
+        Log.e("VIDEO Writer", "open ? " + swingVideoWriter.isOpened() + " wr " + String.valueOf(swingVideoWriter));
         swingVideoWriter.release();
-        Log.e("VIDEO Writer","open ? "+swingVideoWriter.isOpened()+" wr "+String.valueOf(swingVideoWriter));
+        Log.e("VIDEO Writer", "open ? " + swingVideoWriter.isOpened() + " wr " + String.valueOf(swingVideoWriter));
     }
 
 
@@ -214,7 +220,7 @@ public class MediaWrapper {
             motions = new Mat(new Size(frame.cols(), frame.rows()), CvType.CV_8UC(3), Scalar.all(0));
             motions_mask = new Mat(new Size(frame.cols(), frame.rows()), CvType.CV_8U, Scalar.all(0));
             Log.e("VideoWriter", "" + GetModifiedVideoName() + " / " + String.valueOf(frame.rows()) + " / " + String.valueOf(frame.cols()));
-            Log.e("VideoWriter","writer is Opened : "+swingVideoWriter.isOpened());
+            Log.e("VideoWriter", "writer is Opened : " + swingVideoWriter.isOpened());
 
             return true;
         } catch (Exception e) {
@@ -320,12 +326,16 @@ public class MediaWrapper {
         try {
             Mat frame = GenerateFrame(idx, flag);
             swingVideoWriter.write(frame);
-            Utils.matToBitmap(frame,mFrame);
+            //Utils.matToBitmap(frame, mFrame);
             frame.release();
             return true;
         } catch (Exception e) {
             return false;
         }
+    }
+
+    void SetModifiedVideoName(String path, String videoName) {
+        modifiedVideoName = path + videoName;
     }
 
 }

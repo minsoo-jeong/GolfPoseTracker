@@ -1,10 +1,6 @@
 /*
  * This file is auto-generated.  DO NOT MODIFY.
-<<<<<<< HEAD
- * Original file: E:\\GolfPoseTracker-master\\opencv\\java\\src\\org\\opencv\\engine\\OpenCVEngineInterface.aidl
-=======
- * Original file: C:\\Users\\Administrator\\Documents\\AndroidStudio\\GolfPoseTracker\\opencv\\java\\src\\org\\opencv\\engine\\OpenCVEngineInterface.aidl
->>>>>>> 1a51cb54a32deb1b0c65cc7e8ffba79494a71cd8
+ * Original file: C:\\Users\\MS\\Documents\\GolfPoseTracker\\opencv\\java\\src\\org\\opencv\\engine\\OpenCVEngineInterface.aidl
  */
 package org.opencv.engine;
 /**

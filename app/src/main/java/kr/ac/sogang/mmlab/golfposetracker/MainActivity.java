@@ -65,7 +65,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        Log.e("CREATE","Call onCreate");
+        Log.e("CREATE", "Call onCreate");
         setContentView(R.layout.activity_main);
 
         btnSelectVideo = (Button) findViewById(R.id.btnSelectVideo);
@@ -81,7 +81,7 @@ public class MainActivity extends AppCompatActivity {
 
         textViewFrameCount = (TextView) findViewById(R.id.textViewFrameCount);
 
-        previewImg=(ImageView)findViewById(R.id.previewImg);
+        previewImg = (ImageView) findViewById(R.id.previewImg);
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             if (!hasPermissions(PERMISSIONS)) {
@@ -129,7 +129,7 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        Log.e("RESULT","ACTIVITY_RESULT");
+        Log.e("RESULT", "ACTIVITY_RESULT");
         Log.d("result", "" + resultCode);
         super.onActivityResult(requestCode, resultCode, data);
         if (resultCode == this.RESULT_CANCELED) {
@@ -140,9 +140,10 @@ public class MainActivity extends AppCompatActivity {
                 Uri contentURI = data.getData();
                 selectedVideoPath = getPath(contentURI);
                 mediaWrapper.VideoOpen(selectedVideoPath);
+                Log.e("ccc", String.valueOf(mediaWrapper.c));
                 previewImg.setImageBitmap(mediaWrapper.startFrame);
 
-                String modifiedVideoName = GetModifiedVideoName();
+                String modifiedVideoName = GetModifiedVideoName2();
                 String modifiedImageName = GetModifiedImageName();
 
                 editTextVideoName.setText(modifiedVideoName);
@@ -162,7 +163,6 @@ public class MainActivity extends AppCompatActivity {
         if (videoName.contains(".mp4")) {
             regex = ".mp4";
         } else if (videoName.contains(".avi")) {
-
             regex = ".avi";
         }
         return dirPath + videoName.split(regex)[0] + "_Modified" + ".avi";
@@ -243,53 +243,6 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    public boolean CreateSwingVideo2() {
-        try {
-            mediaWrapper.SetModifiedVideoName(editTextVideoName.getText().toString());
-            //sampling rate
-            double th1 = Double.parseDouble(editTextThreshold1.getText().toString());
-            //ref interval
-            double th2 = Double.parseDouble(editTextThreshold2.getText().toString());
-
-            mediaWrapper.SetThresholds(th1, th2);
-            Mat srcFrame, modifiedFrame;
-            int frameCount = 0;
-
-            long start = System.currentTimeMillis();
-
-            int start_idx = 0;
-            int last_idx = mediaWrapper.ScanAllFrames() - 1;
-            if (!mediaWrapper.GetGeneratedVideo()) {
-                mediaWrapper.GenerateVideo();
-            }
-
-            for (int i = 0; i <= last_idx; i++) {
-                boolean flag =  i >= start_idx + th2 && i <= last_idx - th2 && (i - start_idx) % th1 == 0;
-                boolean ret = mediaWrapper.InsertFrameInVideo(i, flag);
-                previewImg.setImageBitmap(mediaWrapper.mFrame);
-                Log.e("Insert frame", "insert a frame into the video... idx : "+i+" / flag : "+flag);
-                if (!ret) {
-                    Log.e("Insert frame", "Fail to insert a frame into the video"+i+"/"+flag);
-                }
-                if (i % 10 == 0) {
-                    Log.d("=== Frame Number ===", "" + String.valueOf(i));
-                }
-            }
-            mediaWrapper.swingVideoRelease();
-            long end = System.currentTimeMillis();
-            double time = (end - start) / 1000.0;
-
-            textViewFrameCount.setText(String.valueOf(last_idx) + " / " + String.valueOf(time) + " sec");
-
-            Log.d("== Processing Time ==", String.valueOf(time) + "sec");
-
-            return true;
-        } catch (Exception e) {
-            return false;
-        }
-    }
-
-
     public boolean CreateSwingImage() {
         try {
             // Test - Save Image
@@ -309,7 +262,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public String getPath(Uri uri) {
-        String[] projection = { MediaStore.Video.Media.DATA };
+        String[] projection = {MediaStore.Video.Media.DATA};
         Cursor cursor = getContentResolver().query(uri, projection, null, null, null);
         if (cursor != null) {
             int column_index = cursor.getColumnIndexOrThrow(MediaStore.Video.Media.DATA);
@@ -331,8 +284,69 @@ public class MainActivity extends AppCompatActivity {
         }
         return true;
     }
-}
 
+    /************************************************************************************/
+    /************************************************************************************/
+    /************************************************************************************/
+
+    public boolean CreateSwingVideo2() {
+        try {
+            mediaWrapper.SetModifiedVideoName(dirPath, editTextVideoName.getText().toString());
+            //sampling rate
+            double th1 = Double.parseDouble(editTextThreshold1.getText().toString());
+            //ref interval
+            double th2 = Double.parseDouble(editTextThreshold2.getText().toString());
+
+            mediaWrapper.SetThresholds(th1, th2);
+            Mat srcFrame, modifiedFrame;
+            int frameCount = 0;
+
+            long start = System.currentTimeMillis();
+
+            int start_idx = 0;
+            int last_idx = mediaWrapper.ScanAllFrames() - 1;
+            if (!mediaWrapper.GetGeneratedVideo()) {
+                mediaWrapper.GenerateVideo();
+            }
+
+            for (int i = 0; i <= last_idx; i++) {
+                boolean flag = i >= start_idx + th2 && i <= last_idx - th2 && (i - start_idx) % th1 == 0;
+                boolean ret = mediaWrapper.InsertFrameInVideo(i, flag);
+                //previewImg.setImageBitmap(mediaWrapper.mFrame);
+                Log.e("Insert frame", "insert a frame into the video... idx : " + i + " / flag : " + flag);
+                if (!ret) {
+                    Log.e("Insert frame", "Fail to insert a frame into the video" + i + "/" + flag);
+                }
+                if (i % 10 == 0) {
+                    Log.d("=== Frame Number ===", "" + String.valueOf(i));
+                }
+            }
+            mediaWrapper.swingVideoRelease();
+            long end = System.currentTimeMillis();
+            double time = (end - start) / 1000.0;
+
+            textViewFrameCount.setText(String.valueOf(last_idx) + " / " + String.valueOf(time) + " sec");
+
+            Log.d("== Processing Time ==", String.valueOf(time) + "sec");
+
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+    public String GetModifiedVideoName2() {
+        String[] videoNameTmp = selectedVideoPath.split(dirPath);
+        String videoName = videoNameTmp[(int) videoNameTmp.length - 1];
+        String regex = "";
+        if (videoName.contains(".mp4")) {
+            regex = ".mp4";
+        } else if (videoName.contains(".avi")) {
+            regex = ".avi";
+        }
+        return videoName.split(regex)[0] + "_Modified" + ".avi";
+    }
+}
 
 
 //
