@@ -56,8 +56,7 @@ public class MediaWrapper {
 
     private Mat motions;
     private Mat motions_mask;
-    public Bitmap startFrame;
-    public Bitmap mFrame;
+    public Bitmap startBitmap;
 
     private int smpRate;
     private int refIntv;
@@ -371,6 +370,8 @@ public class MediaWrapper {
         swingVideoWriter = new VideoWriter(GetModifiedVideoName(), VideoWriter.fourcc('M', 'J', 'P', 'G'), 30.0, new Size(frame.cols(), frame.rows()), true);
         motions = new Mat(new Size(frame.cols(), frame.rows()), CvType.CV_8UC(3), Scalar.all(0));
         motions_mask = new Mat(new Size(frame.cols(), frame.rows()), CvType.CV_8U, Scalar.all(0));
+        //Utils.matToBitmap(frame,startBitmap);
+
         //System.out.println("success to create Video : "+GetModifiedVideoName());
         Log.e("MSG", "success to create Video : " + GetModifiedVideoName());
 
@@ -504,7 +505,6 @@ public class MediaWrapper {
             frame.release();
             Log.e("MSG", "free curr : " + idx);
         }
-        m_frame.release();
         return m_frame;
     }
 

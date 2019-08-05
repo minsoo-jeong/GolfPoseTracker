@@ -34,6 +34,9 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import static org.opencv.imgproc.Imgproc.COLOR_BGR2RGB;
+import static org.opencv.imgproc.Imgproc.cvtColor;
+
 
 public class MainActivity extends AppCompatActivity {
 
@@ -83,7 +86,7 @@ public class MainActivity extends AppCompatActivity {
 
         textViewFrameCount = (TextView) findViewById(R.id.textViewFrameCount);
 
-        //previewImg=(ImageView)findViewById(R.id.previewImg);
+        previewImg=(ImageView)findViewById(R.id.previewImg);
 
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
@@ -112,11 +115,18 @@ public class MainActivity extends AppCompatActivity {
                         Toast.makeText(getApplicationContext(), result.toastString(), Toast.LENGTH_LONG).show();
                     }
                 };
+                final Handler frameHandler= new Handler(){
+                    public void handleMessage(Message msg){
+                        Bitmap bitmap=(Bitmap)msg.obj;
+                        previewImg.setImageBitmap(bitmap);
+                    }
+                };
+
 
                 Thread GenerateThread = new Thread(new Runnable() {
                     @Override
                     public void run() {
-                        GenerateResult success = CreateSwingVideo3();
+                        GenerateResult success = CreateSwingVideo3(frameHandler);
                         Message msg = thread_handler.obtainMessage();
                         msg.what = 0;
                         msg.obj = success;
@@ -162,8 +172,7 @@ public class MainActivity extends AppCompatActivity {
 
         super.onActivityResult(requestCode, resultCode, data);
         if (resultCode == this.RESULT_CANCELED) {
-            //previewImg.setImageBitmap(mediaWrapper.startFrame);
-            //previewImg.setImageResource(R.drawable.preview_default);
+            previewImg.setImageResource(R.drawable.preview_default);
             return;
         }
         if (requestCode == GALLERY) {
@@ -320,7 +329,7 @@ public class MainActivity extends AppCompatActivity {
     /************************************************************************************/
 
 
-    public GenerateResult CreateSwingVideo3() {
+    public GenerateResult CreateSwingVideo3(Handler frameHandler) {
         try {
             GenerateResult r = new GenerateResult();
 
@@ -334,8 +343,20 @@ public class MainActivity extends AppCompatActivity {
 
             mediaWrapper.init_vid();
             int i = 0;
+
             while (mediaWrapper.GetFrame()||mediaWrapper.GetFrameBufSize()!=0) {
-                mediaWrapper.generate_frame();
+                Message msg=frameHandler.obtainMessage();
+                Mat frame=mediaWrapper.generate_frame();
+                System.out.println(frame);
+                cvtColor(frame, frame, COLOR_BGR2RGB);
+                Bitmap bitmap = Bitmap.createBitmap(frame.cols(), frame.rows(), Bitmap.Config.RGB_565);
+                Utils.matToBitmap(frame,bitmap);
+                System.out.println(bitmap);
+                msg.what=0;
+                msg.obj=bitmap;
+                frameHandler.sendMessage(msg);
+                frame.release();
+
                 Log.e("Insert frame", "insert a frame into the video... idx : " + i);
                 i++;
             }

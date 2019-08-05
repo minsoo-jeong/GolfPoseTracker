@@ -1,6 +1,6 @@
 /*
  * This file is auto-generated.  DO NOT MODIFY.
- * Original file: C:\\Users\\MS\\Documents\\GolfPoseTracker\\opencv\\java\\src\\org\\opencv\\engine\\OpenCVEngineInterface.aidl
+ * Original file: E:\\GolfPoseTracker-master\\opencv\\java\\src\\org\\opencv\\engine\\OpenCVEngineInterface.aidl
  */
 package org.opencv.engine;
 /**
