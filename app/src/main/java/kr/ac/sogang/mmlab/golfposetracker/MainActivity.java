@@ -110,13 +110,16 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 //boolean success = CreateSwingVideo();
-
+                btnSelectVideo.setEnabled(false);
+                btnCreateVideo.setEnabled(false);
                 final Handler thread_handler = new Handler() {
                     @Override
                     public void handleMessage(Message msg) {
                         super.handleMessage(msg);
                         GenerateResult result = (GenerateResult) msg.obj;
                         textViewFrameCount.setText(result.textViewString());
+                        btnSelectVideo.setEnabled(true);
+                        btnCreateVideo.setEnabled(true);
                         Toast.makeText(getApplicationContext(), result.toastString(), Toast.LENGTH_LONG).show();
                     }
                 };
@@ -130,6 +133,7 @@ public class MainActivity extends AppCompatActivity {
                 if (!(dir.exists() && dir.isDirectory())) {
                     dir.mkdir();
                 }
+
                 Thread GenerateThread = new Thread(new Runnable() {
                     @Override
                     public void run() {
