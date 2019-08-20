@@ -153,17 +153,20 @@ public class MainActivity extends AppCompatActivity {
                 //previewImg.setImageResource(R.drawable.preview_default);
             }
         });
-
         btnCreateImage.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                Toast.makeText(getApplicationContext(), "Coming Soon...!", Toast.LENGTH_LONG).show();
+                /*
                 boolean success = CreateSwingImage();
                 if (success)
                     Toast.makeText(getApplicationContext(), "Create Image Success", Toast.LENGTH_LONG).show();
                 else
                     Toast.makeText(getApplicationContext(), "Create Image Fail", Toast.LENGTH_LONG).show();
+                */
             }
         });
+
     }
 
     public void chooseVideoFromGallary() {
@@ -191,7 +194,7 @@ public class MainActivity extends AppCompatActivity {
                 //previewImg.setImageBitmap(mediaWrapper.startFrame);
 
                 String modifiedVideoName = GetModifiedVideoName2();
-                String modifiedImageName = GetModifiedImageName();
+                String modifiedImageName = GetModifiedImageName2();
 
                 editTextVideoName.setText(modifiedVideoName);
                 editTextImageName.setText(modifiedImageName);
@@ -396,6 +399,21 @@ public class MainActivity extends AppCompatActivity {
         }
         return videoName.split(regex)[0] + "_Modified" + ".avi";
     }
+    public String GetModifiedImageName2() {
+        String[] imageNameTmp = selectedVideoPath.split(dirPath);
+        String imageName = imageNameTmp[(int) imageNameTmp.length - 1];
+        String regex = "";
+
+        if (imageName.contains(".mp4")) {
+            regex = ".mp4";
+        } else if (imageName.contains(".avi")) {
+            regex = ".avi";
+        }
+        String modifiedImageName = imageName.split(regex)[0] + "_Modified" + ".png";
+
+        return modifiedImageName;
+    }
+
 }
 
 
