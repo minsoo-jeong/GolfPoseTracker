@@ -1,6 +1,7 @@
 package kr.ac.sogang.mmlab.golfposetracker;
 
 import android.app.AlertDialog;
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
@@ -9,6 +10,7 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 
+import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
 import android.os.SystemClock;
@@ -30,6 +32,7 @@ import org.opencv.android.Utils;
 import org.opencv.core.Core;
 import org.opencv.core.Mat;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -57,6 +60,7 @@ public class MainActivity extends AppCompatActivity {
     private MediaWrapper mediaWrapper = new MediaWrapper();
     private String selectedVideoPath;
     private String dirPath = "/storage/emulated/0/DCIM/Camera/";
+    private String poseTracerPath = Environment.getExternalStorageDirectory() + "/DCIM/PoseTracer/";
 
     static final int PERMISSIONS_REQUEST_CODE = 1000;
 
@@ -86,7 +90,7 @@ public class MainActivity extends AppCompatActivity {
 
         textViewFrameCount = (TextView) findViewById(R.id.textViewFrameCount);
 
-        previewImg=(ImageView)findViewById(R.id.previewImg);
+        previewImg = (ImageView) findViewById(R.id.previewImg);
 
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
@@ -106,23 +110,26 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 //boolean success = CreateSwingVideo();
+
                 final Handler thread_handler = new Handler() {
                     @Override
                     public void handleMessage(Message msg) {
                         super.handleMessage(msg);
-                        GenerateResult result=(GenerateResult)msg.obj;
+                        GenerateResult result = (GenerateResult) msg.obj;
                         textViewFrameCount.setText(result.textViewString());
                         Toast.makeText(getApplicationContext(), result.toastString(), Toast.LENGTH_LONG).show();
                     }
                 };
-                final Handler frameHandler= new Handler(){
-                    public void handleMessage(Message msg){
-                        Bitmap bitmap=(Bitmap)msg.obj;
+                final Handler frameHandler = new Handler() {
+                    public void handleMessage(Message msg) {
+                        Bitmap bitmap = (Bitmap) msg.obj;
                         previewImg.setImageBitmap(bitmap);
                     }
                 };
-
-
+                File dir = new File(poseTracerPath);
+                if (!(dir.exists() && dir.isDirectory())) {
+                    dir.mkdir();
+                }
                 Thread GenerateThread = new Thread(new Runnable() {
                     @Override
                     public void run() {
@@ -142,7 +149,7 @@ public class MainActivity extends AppCompatActivity {
                     }
                 });
                 GenerateThread.start();
-
+                getApplicationContext().sendBroadcast(new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE), mediaWrapper.GetModifiedVideoName());
                 //previewImg.setImageResource(R.drawable.preview_default);
             }
         });
@@ -333,7 +340,11 @@ public class MainActivity extends AppCompatActivity {
         try {
             GenerateResult r = new GenerateResult();
 
-            mediaWrapper.SetModifiedVideoName(dirPath, editTextVideoName.getText().toString());
+            // check already exist
+            String path=dirPath+editTextImageName.getText().toString();
+
+            //mediaWrapper.SetModifiedVideoName(dirPath, editTextVideoName.getText().toString());
+            mediaWrapper.SetModifiedVideoName(poseTracerPath, editTextVideoName.getText().toString());
             //sampling rate
             double th1 = Double.parseDouble(editTextThreshold1.getText().toString());
             //ref interval
@@ -344,19 +355,18 @@ public class MainActivity extends AppCompatActivity {
             mediaWrapper.init_vid();
             int i = 0;
 
-            while (mediaWrapper.GetFrame()||mediaWrapper.GetFrameBufSize()!=0) {
-                Message msg=frameHandler.obtainMessage();
-                Mat frame=mediaWrapper.generate_frame();
-                System.out.println(frame);
+            while (mediaWrapper.GetFrame() || mediaWrapper.GetFrameBufSize() != 0) {
+                Message msg = frameHandler.obtainMessage();
+                Mat frame = mediaWrapper.generate_frame();
+                //System.out.println(frame);
                 cvtColor(frame, frame, COLOR_BGR2RGB);
                 Bitmap bitmap = Bitmap.createBitmap(frame.cols(), frame.rows(), Bitmap.Config.RGB_565);
-                Utils.matToBitmap(frame,bitmap);
-                System.out.println(bitmap);
-                msg.what=0;
-                msg.obj=bitmap;
+                Utils.matToBitmap(frame, bitmap);
+                //System.out.println(bitmap);
+                msg.what = 0;
+                msg.obj = bitmap;
                 frameHandler.sendMessage(msg);
                 frame.release();
-
                 Log.e("Insert frame", "insert a frame into the video... idx : " + i);
                 i++;
             }
@@ -372,53 +382,6 @@ public class MainActivity extends AppCompatActivity {
             GenerateResult r = new GenerateResult();
             r.setFail();
             return r;
-        }
-    }
-
-    public boolean CreateSwingVideo2() {
-        try {
-            mediaWrapper.SetModifiedVideoName(dirPath, editTextVideoName.getText().toString());
-            //sampling rate
-            double th1 = Double.parseDouble(editTextThreshold1.getText().toString());
-            //ref interval
-            double th2 = Double.parseDouble(editTextThreshold2.getText().toString());
-
-            mediaWrapper.SetThresholds(th1, th2);
-            Mat srcFrame, modifiedFrame;
-            int frameCount = 0;
-
-            long start = System.currentTimeMillis();
-
-            int start_idx = 0;
-            int last_idx = mediaWrapper.ScanAllFrames() - 1;
-            if (!mediaWrapper.GetGeneratedVideo()) {
-                mediaWrapper.GenerateVideo();
-            }
-
-            for (int i = 0; i <= last_idx; i++) {
-                boolean flag = i >= start_idx + th2 && i <= last_idx - th2 && (i - start_idx) % th1 == 0;
-                boolean ret = mediaWrapper.InsertFrameInVideo(i, flag);
-                //previewImg.setImageBitmap(mediaWrapper.mFrame);
-
-                Log.e("Insert frame", "insert a frame into the video... idx : " + i + " / flag : " + flag);
-                if (!ret) {
-                    Log.e("Insert frame", "Fail to insert a frame into the video" + i + "/" + flag);
-                }
-                if (i % 10 == 0) {
-                    Log.d("=== Frame Number ===", "" + String.valueOf(i));
-                }
-            }
-            mediaWrapper.swingVideoRelease();
-            long end = System.currentTimeMillis();
-            double time = (end - start) / 1000.0;
-
-            textViewFrameCount.setText(String.valueOf(last_idx) + " / " + String.valueOf(time) + " sec");
-
-            Log.d("== Processing Time ==", String.valueOf(time) + "sec");
-
-            return true;
-        } catch (Exception e) {
-            return false;
         }
     }
 

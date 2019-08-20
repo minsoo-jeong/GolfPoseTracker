@@ -154,9 +154,7 @@ public class MediaWrapper {
         modifiedVideoName = videoName;
     }
 
-    String GetModifiedVideoName() {
-        return modifiedVideoName;
-    }
+    String GetModifiedVideoName() { return modifiedVideoName;  }
 
     void SetModifiedImageName(String imageName) {
         modifiedImageName = imageName;
@@ -475,7 +473,7 @@ public class MediaWrapper {
         Mat m_frame = frame.clone();
 
         //System.out.println("idx : " + String.valueOf(idx) + "/ Sample : " + isSample(idx) + "/ Prev : " + isPrev(idx) + "/ Next : " + isNext(idx));
-        Log.e("MSG", "idx : " + String.valueOf(idx) + "/ Sample : " + isSample(idx) + "/ Prev : " + isPrev(idx) + "/ Next : " + isNext(idx));
+        //Log.e("MSG", "idx : " + String.valueOf(idx) + "/ Sample : " + isSample(idx) + "/ Prev : " + isPrev(idx) + "/ Next : " + isNext(idx));
         if (isPrev(idx) != -1) {
             prev.addLast(frame);
             prev_indice.addLast(idx);
@@ -489,10 +487,10 @@ public class MediaWrapper {
                 Mat next_im = frameBuf.peekLast();
                 if (prev_idx == idx - refIntv && next_idx == idx + refIntv) {
                     //System.out.println("update motion... " + prev_idx + "/" + idx + "/" + next_idx);
-                    Log.e("MSG", "update motion... " + prev_idx + "/" + idx + "/" + next_idx);
+                    //Log.e("MSG", "update motion... " + prev_idx + "/" + idx + "/" + next_idx);
                     update_motion(prev_im, frame, next_im);
                     prev_im.release();
-                    Log.e("MSG", "free prev : " + prev_idx);
+                    //Log.e("MSG", "free prev : " + prev_idx);
                 }
             }
         }
